@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
                  adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, items);
 
             } catch (InterruptedException e) {
-
+                System.out.println("We failed sleeping");
             } catch (FileNotFoundException e) {// if fails: print error and exit
                 System.out.println("Error1 reading file '" + fileName[0] + "'..." );
                 System.exit(1);
@@ -109,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
             } catch (InterruptedException e) {
+                System.out.println("We failed sleeping");
             }catch (Exception ex){System.out.println("We fail managing files");}
             return null;
         }

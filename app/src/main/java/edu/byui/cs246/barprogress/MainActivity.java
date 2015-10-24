@@ -14,13 +14,15 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    ArrayAdapter<String> adapter;
+    ArrayAdapter<Integer> adapter;
     ListView loadView;
     private ProgressBar firstBar = null;
     int i = 0;
@@ -28,23 +30,82 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        loadView = (ListView) findViewById(R.id.listView);
         firstBar = (ProgressBar)findViewById(R.id.progressBar);
     }
 
     public void createFile (View V) {
         String fileName = "numbers.txt";
-        File file = new File(getFilesDir(), fileName);
+        //File file = new File(getFilesDir(), fileName);
         new CreateFile().execute(fileName);
     }
     public void loadFile(View V) {
         String fileName = "numbers.txt";
-        loadView = (ListView) findViewById(R.id.listView);
+
+
         //File file = new File(getFilesDir(), fileName);
         new LoadFile().execute(fileName);
     }
     public void clear(View view){
-        adapter.clear();
+        if(adapter != null)
+            adapter.clear();
+    }
+
+    class LoadFile extends AsyncTask<String, Integer, ArrayAdapter<Integer>> {
+
+        @Override
+        protected ArrayAdapter<Integer> doInBackground(String... fileName) {
+
+            ArrayList<Integer> items = new ArrayList<>();
+
+            try (Scanner scanner = new Scanner(new File(getFilesDir(), fileName[0]))){// try to open the file
+                System.out.println(fileName[0]);
+                while (scanner.hasNextInt()){// Loop through each line
+                    items.add(scanner.nextInt());
+                    i++;
+                    publishProgress(i);
+                    Thread.sleep(250);
+                }
+                 adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, items);
+
+            } catch (InterruptedException e) {
+
+            } catch (FileNotFoundException e) {// if fails: print error and exit
+                System.out.println("Error1 reading file '" + fileName + "'..." );
+                System.exit(1);
+            }
+
+
+            return adapter;
+        }
+        protected void onProgressUpdate(Integer...progress){
+            //i = progress[0] * 10;
+            if (progress[0] == 1) {
+                //make the progress bar visible
+                firstBar.setVisibility(View.VISIBLE);
+                firstBar.setMax(10);
+            }
+
+            else if (progress[0] < firstBar.getMax() ) {
+                //Set first progress bar value
+                firstBar.setProgress(progress[0]);
+                //Set the second progress bar value
+                firstBar.setSecondaryProgress(progress[0] + 10);
+            }
+            else if (progress[0] == firstBar.getMax()){
+                firstBar.setProgress(0);
+                firstBar.setSecondaryProgress(0);
+                firstBar.setVisibility(View.GONE);
+
+            }
+
+            System.out.println(i);
+
+        }
+        protected void onPostExecute(ArrayAdapter<Integer> result){
+            //adapter.notifyDataSetChanged();
+            loadView.setAdapter(result);
+        }
     }
 
     class CreateFile extends AsyncTask<String, Integer, Void> {
@@ -52,16 +113,16 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... fileName) {
             FileOutputStream outputStream;
-            try {
+            try (FileWriter writer = new FileWriter(new File(getFilesDir(), fileName[0]))){
 //            String fileName = "numbers.txt";
 //            File file = new File(MainActivity.getFilesDir(), fileName);
-                outputStream = openFileOutput(fileName[0], Context.MODE_PRIVATE);
+                //outputStream = openFileOutput(fileName[0], Context.MODE_PRIVATE);
                 for (int i = 1; i <= 10; i++) {
-                    outputStream.write(i);
+                    writer.write(i + System.getProperty("line.separator"));
                     publishProgress(i);
                     Thread.sleep(250);
                 }
-                outputStream.close();
+
             } catch (InterruptedException e) {
             }catch (Exception ex){System.out.println("We fail managing files");}
             return null;
@@ -92,62 +153,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    class LoadFile extends AsyncTask<String, Integer, Void> {
 
-        @Override
-        protected Void doInBackground(String... fileName) {
-
-            ArrayList<String> items = new ArrayList<String>();
-            String line;
-            try {// try to open the file
-                BufferedReader reader = new BufferedReader(new FileReader(fileName[0]));
-                while ((line = reader.readLine()) != null){// Loop through each line
-                    items.add(line);
-                    i++;
-                    publishProgress(i);
-                    Thread.sleep(250);
-                }
-                adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, items);
-                loadView.setAdapter(adapter);
-
-
-            } catch (InterruptedException e) {
-
-            } catch (FileNotFoundException e) {// if fails: print error and exit
-                System.out.println("Error reading file '" + fileName + "'..." );
-                System.exit(1);
-            }
-            catch (IOException ex) {
-                System.out.println("Error reading file '" + fileName + "'..." );
-                System.exit(1);
-            }
-
-            return null;
-        }
-        protected void onProgressUpdate(Integer...progress){
-            //i = progress[0] * 10;
-            if (progress[0] == 1) {
-                //make the progress bar visible
-                firstBar.setVisibility(View.VISIBLE);
-                firstBar.setMax(10);
-            }
-
-            else if ( progress[0] < firstBar.getMax() ) {
-                //Set first progress bar value
-                firstBar.setProgress(progress[0]);
-                //Set the second progress bar value
-                firstBar.setSecondaryProgress(progress[0] + 10);
-            }
-            else if (progress[0] == firstBar.getMax()){
-                firstBar.setProgress(0);
-                firstBar.setSecondaryProgress(0);
-                firstBar.setVisibility(View.GONE);
-
-            }
-
-            System.out.println(i);
-
-        }
-    }
 }
 

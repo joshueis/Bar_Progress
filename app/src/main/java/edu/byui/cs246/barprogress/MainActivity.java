@@ -1,6 +1,6 @@
 package edu.byui.cs246.barprogress;
 
-import android.content.Context;
+
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,16 +9,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
-
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,14 +31,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void createFile (View V) {
         String fileName = "numbers.txt";
-        //File file = new File(getFilesDir(), fileName);
         new CreateFile().execute(fileName);
     }
     public void loadFile(View V) {
         String fileName = "numbers.txt";
-
-
-        //File file = new File(getFilesDir(), fileName);
         new LoadFile().execute(fileName);
     }
     public void clear(View view){
@@ -71,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (InterruptedException e) {
 
             } catch (FileNotFoundException e) {// if fails: print error and exit
-                System.out.println("Error1 reading file '" + fileName + "'..." );
+                System.out.println("Error1 reading file '" + fileName[0] + "'..." );
                 System.exit(1);
             }
 
@@ -79,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
             return adapter;
         }
         protected void onProgressUpdate(Integer...progress){
-            //i = progress[0] * 10;
             if (progress[0] == 1) {
                 //make the progress bar visible
                 firstBar.setVisibility(View.VISIBLE);
@@ -98,12 +88,9 @@ public class MainActivity extends AppCompatActivity {
                 firstBar.setVisibility(View.GONE);
 
             }
-
             System.out.println(i);
-
         }
         protected void onPostExecute(ArrayAdapter<Integer> result){
-            //adapter.notifyDataSetChanged();
             loadView.setAdapter(result);
         }
     }
@@ -112,11 +99,9 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(String... fileName) {
-            FileOutputStream outputStream;
+
             try (FileWriter writer = new FileWriter(new File(getFilesDir(), fileName[0]))){
-//            String fileName = "numbers.txt";
-//            File file = new File(MainActivity.getFilesDir(), fileName);
-                //outputStream = openFileOutput(fileName[0], Context.MODE_PRIVATE);
+
                 for (int i = 1; i <= 10; i++) {
                     writer.write(i + System.getProperty("line.separator"));
                     publishProgress(i);
@@ -128,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
         protected void onProgressUpdate(Integer...progress){
-            //i = progress[0] * 10;
+
             if (progress[0] == 1) {
                 //make the progress bar visible
                 firstBar.setVisibility(View.VISIBLE);
@@ -149,7 +134,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
             System.out.println(progress[0]);
-
         }
     }
 

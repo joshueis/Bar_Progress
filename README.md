@@ -1,0 +1,1 @@
+This project would show the implementation of a bar progress on Android Studio, it would use a thread different of the GUI thread/main thread to allow processes to be run in the background and update the progress in bar accordingly. 
